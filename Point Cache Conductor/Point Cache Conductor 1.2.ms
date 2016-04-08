@@ -1,6 +1,6 @@
 /*
 Point Cache Conductor
-Version: 1.1
+Version: 1.2
 by Jefferson D. Lim
 
 - Enables PointCaching in WORLD SPACE a selection of objects onto a path repository using.
