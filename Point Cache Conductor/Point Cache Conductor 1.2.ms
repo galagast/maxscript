@@ -11,16 +11,17 @@ by Jefferson D. Lim
 
 * Names of objects for caching should not end with 3 trail numbers
 
+[1.2]
+2016-04-08
+		Uploaded to Github.
+		Further update notes will be there.
+		Renamed to Point Cache Conductor.
 
 [1.1]
 2015-09-14
 01		Fixed Not centering when Connecting Local Timer
 		Fixed Connect Local Timer Issues
 			- Local timer being created even is selection has no pcache mods.
-2016-04-08
-		Uploaded to Github.
-		Further update notes will be there.
-		Renamed to Point Cache Conductor.
 
 [1.0]
 2015-07-28
@@ -69,7 +70,7 @@ by Jefferson D. Lim
 */
 
 try(destroyDialog pcacheConductor)catch()
-rollout pcacheConductor "PCache Conductor 1.1" width:200 height:435
+rollout pcacheConductor "PCache Conductor 1.2" width:200 height:435
 (
 	local tStart
 	local tEnd
