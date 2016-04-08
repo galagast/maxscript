@@ -534,7 +534,7 @@ rollout motionPCache "Motion PCache 1.1" width:200 height:435
 		-- Offset
 		locObj.offset.controller = bezier_float()
 		locObj.time.controller.available.controller = locObj.offset.controller 
-		theLst.setname 2 "TimeOffset"
+		theLst.setName 2 "TimeOffset"
 		
 		locObj
 	)
@@ -620,6 +620,7 @@ rollout motionPCache "Motion PCache 1.1" width:200 height:435
 		(
 			local theCon = bezier_float()
 			gloObj.time.controller = theLoc.time.controller["TimePlayback"].controller = theCon
+			gloObj.time.controller.setName = "TimePlayback"
 			
 			addNewKey theCon tStart
 			addNewKey theCon tEnd
@@ -834,7 +835,7 @@ rollout motionPCache "Motion PCache 1.1" width:200 height:435
 							)
 							3: -- if set to playback graph, use existing animation controller
 							(
-								locObj.time.controller = m.playbackFrame.controller
+								locObj.time.controller["TimePlayback"].controller = m.playbackFrame.controller
 							)
 						)
 						
