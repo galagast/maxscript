@@ -1,7 +1,11 @@
 /*
 Tera Cleaner
-Version: 1.2
+Version: 1.3
 by Jefferson D. Lim
+
+[1.3]
+- added cleaning of emtpy layers
+- added icons for layers
 
 [1.2]
 - updated remRet
@@ -16,48 +20,53 @@ by Jefferson D. Lim
 
 
 */
-
 try(destroyDialog teraCleaner)catch()
-rollout teraCleaner "Tera Cleaner 1.2" width:260 height:305
+rollout teraCleaner "Tera Cleaner 1.3" width:260 height:335
 (
 	local activeArr = #()
-	local note = "* Please make sure to SAVE or have a BAKCUP of your scene prior to running the cleaner operations just in case the scene get's corrupted due to the deletions."
+	local note = "* Please make sure to SAVE or have a BAKCUP of your scene prior to running the cleaner operations just in case the scene gets corrupted due to the deletions."
 	
-	button btn_ref "Refresh" pos:[5,5] width:250 height:25
+	button btn_ref "Refresh" pos:[5,5] width:250 height:25 align:#left
 	
-	GroupBox grp_search "Search:" pos:[5,30] width:250 height:195
+	GroupBox grp_search "Search:" pos:[5,30] width:250 height:220 align:#left
 	
-	label lbl_anim "Anim Layers:" pos:[15,50] height:15
-	label _lbl_anim "0" pos:[170,50] width:50 height:15
-	button btn_anim "x" pos:[225,45] width:25 height:25
+	label lbl_anim "Anim Layers:" pos:[15,50] align:#left
+	label _lbl_anim "0" pos:[170,50] align:#left
+	button btn_anim "x" pos:[225,45] width:25 height:25 align:#left
 	
-	label lbl_animca "Anim Layers Custom Attributes:" pos:[15,75] height:15
-	label _lbl_animca "0" pos:[170,75] width:50 height:15
-	button btn_animca "x" pos:[225,70] width:25 height:25
+	label lbl_animca "Anim Layers Custom Attributes:" pos:[15,75] align:#left
+	label _lbl_animca "0" pos:[170,75] align:#left
+	button btn_animca "x" pos:[225,70] width:25 height:25 align:#left
 	
-	label lbl_ca "Global Custom Attributes:" pos:[15,100] height:15
-	label _lbl_ca "0" pos:[170,100] width:50 height:15
-	button btn_ca "x" pos:[225,95] width:25 height:25
+	label lbl_ca "Global Custom Attributes:" pos:[15,100] align:#left
+	label _lbl_ca "0" pos:[170,100] align:#left
+	button btn_ca "x" pos:[225,95] width:25 height:25 align:#left
 	
-	label lbl_bip "Track View Biped:" pos:[15,125] height:15
-	label _lbl_bip "0" pos:[170,125] width:50 height:15
-	button btn_bip "x" pos:[225,120] width:25 height:25
+	label lbl_bip "Track View Biped:" pos:[15,125] align:#left
+	label _lbl_bip "0" pos:[170,125] align:#left
+	button btn_bip "x" pos:[225,120] width:25 height:25 align:#left
 	
-	label lbl_ray "Raytrace Engine Globals:" pos:[15,150] height:13
-	label _lbl_ray "0" pos:[170,150] width:50 height:15
-	button btn_ray "x" pos:[225,145] width:25 height:25
+	label lbl_ray "Raytrace Engine Globals:" pos:[15,150] align:#left
+	label _lbl_ray "0" pos:[170,150] align:#left
+	button btn_ray "x" pos:[225,145] width:25 height:25 align:#left
 	
-	label lbl_mo "Max MotionClip Manager:" pos:[15,175] height:15
-	label _lbl_mo "0" pos:[170,175] width:50 height:15
-	button btn_mo "x" pos:[225,170] width:25 height:25
+	label lbl_mo "Max MotionClip Manager:" pos:[15,175]  align:#left
+	label _lbl_mo "0" pos:[170,175] align:#left
+	button btn_mo "x" pos:[225,170] width:25 height:25 align:#left
 	
-	label lbl_ret "Retimer Manager:" pos:[15,200] height:15
-	label _lbl_ret "0" pos:[170,200] width:50 height:15
-	button btn_ret "x" pos:[225,195] width:25 height:25
+	label lbl_ret "Retimer Manager:" pos:[15,200] align:#left
+	label _lbl_ret "0" pos:[170,200] align:#left
+	button btn_ret "x" pos:[225,195] width:25 height:25 align:#left
 	
-	progressBar pb "" pos:[5,230] width:250 height:10
+	label lbl_layers "Empty Layers:" pos:[15,225] align:#left
+	label _lbl_layers "0" pos:[170,225] align:#left
+	button btn_layers "x" pos:[225,220] width:25 height:25 align:#left
 	
-	label _lbl_warn "" pos:[10,245] width:245 height:55
+	progressBar pb "" pos:[5,255] width:250 height:10 align:#left
+	
+	label _lbl_warn "" pos:[10,270] width:245 height:55 align:#left
+	
+
 	
 	fn fixLabels ui offset:3 =
 	(
@@ -98,6 +107,37 @@ rollout teraCleaner "Tera Cleaner 1.2" width:260 height:305
 		custAttributes.count rootscene
 	)
 	
+	fn emptyLayers remove:off =
+	(
+		local layerEmpty = #()
+		local layerCount = layerManager.count
+		for i in 0 to layerCount-1 do
+		(
+			local theLayer = layerManager.getLayer i
+			if theLayer != undefined then
+			(
+				local theName = theLayer.name
+				local theObject = ILayerManager.getLayerObject i
+				local hasNodes = layerManager.doesLayerHierarchyContainNodes theName
+				if not hasNodes then
+				(
+					append layerEmpty theName
+				)
+			)
+		)
+		
+		local count = layerEmpty.count
+		if remove then
+		(
+			for i in count to 1 by -1 do
+			(
+				layerManager.deleteLayerHierarchy layerEmpty[i]
+			)
+		)
+		
+		count
+	)
+	
 	fn initUI =
 	(
 		fixLabels teraCleaner offset:35
@@ -135,8 +175,16 @@ rollout teraCleaner "Tera Cleaner 1.2" width:260 height:305
 		btn_ret.tooltip = if state then "Found:\n" + retCount as string + " retimer(s)" else ""
 		btn_ret.enabled = state
 		
+		local layersCount = emptyLayers()
+		_lbl_layers.text = layersCount as string
+		btn_layers.enabled = layersCount != 0
+		
 		_lbl_warn.text = note
 	)
+	
+	----------------------------------------------------------
+	--	              REMOVAL Functions                     --
+	----------------------------------------------------------
 	
 	fn remAnimLayers =
 	(
@@ -240,6 +288,16 @@ rollout teraCleaner "Tera Cleaner 1.2" width:260 height:305
 		initUI()
 	)
 	
+	fn remLayers =
+	(
+		emptyLayers remove:on
+		initUI()
+	)
+	
+	----------------------------------------------------------
+	--	                   UI Functions                     --
+	----------------------------------------------------------
+	
 	on btn_ref pressed do initUI()
 	on teraCleaner open do initUI()
 	
@@ -250,6 +308,8 @@ rollout teraCleaner "Tera Cleaner 1.2" width:260 height:305
 	on btn_ray pressed do undo "Remove TrackView Raytrace Engine Globals" on remRay()
 	on btn_Mo pressed do undo "Remove TrackView Max MotionClip Manager" on remMo()
 	on btn_Ret pressed do undo off remRet()
+	on btn_layers pressed do undo "Remove Empty Layers" on remLayers()
+	on chk_sublayers changed state do setCheckboxIcon chk_sublayers state
 )
 createDialog teraCleaner
 
