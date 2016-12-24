@@ -1,9 +1,15 @@
 /*
 Tera Cleaner
-Version: 1.3
+Version: 1.4
 by Jefferson D. Lim
 
+[1.4]
+2016-12-24
+- added proSound removal
+- added checking for empty default layer
+
 [1.3]
+2016-12-22
 - added cleaning of emtpy layers
 - added icons for layers
 
@@ -17,18 +23,16 @@ by Jefferson D. Lim
 [1.0]
 2015-08-03
 - Initial Build
-
-
 */
 try(destroyDialog teraCleaner)catch()
-rollout teraCleaner "Tera Cleaner 1.3" width:260 height:335
+rollout teraCleaner "Tera Cleaner 1.4" width:260 height:370
 (
 	local activeArr = #()
 	local note = "* Please make sure to SAVE or have a BAKCUP of your scene prior to running the cleaner operations just in case the scene gets corrupted due to the deletions."
 	
 	button btn_ref "Refresh" pos:[5,5] width:250 height:25 align:#left
 	
-	GroupBox grp_search "Search:" pos:[5,30] width:250 height:220 align:#left
+	GroupBox grp_search "Search:" pos:[5,30] width:250 height:250 align:#left
 	
 	label lbl_anim "Anim Layers:" pos:[15,50] align:#left
 	label _lbl_anim "0" pos:[170,50] align:#left
@@ -62,9 +66,13 @@ rollout teraCleaner "Tera Cleaner 1.3" width:260 height:335
 	label _lbl_layers "0" pos:[170,225] align:#left
 	button btn_layers "x" pos:[225,220] width:25 height:25 align:#left
 	
-	progressBar pb "" pos:[5,255] width:250 height:10 align:#left
+	label lbl_sound "ProSound:" pos:[15,250] width:50 height:13 align:#left
+	label _lbl_sound "0" pos:[170,250] width:6 height:13 align:#left
+	button btn_sound "x" pos:[225,245] width:25 height:25 align:#left
 	
-	label _lbl_warn "" pos:[10,270] width:245 height:55 align:#left
+	progressBar pb "" pos:[5,290] width:250 height:10 align:#left
+	
+	label _lbl_warn "" pos:[10,305] width:245 height:55 align:#left
 	
 
 	
@@ -107,7 +115,7 @@ rollout teraCleaner "Tera Cleaner 1.3" width:260 height:335
 		custAttributes.count rootscene
 	)
 	
-	fn emptyLayers remove:off =
+	fn countEmptyLayers remove:off =
 	(
 		local layerEmpty = #()
 		local layerCount = layerManager.count
@@ -133,6 +141,18 @@ rollout teraCleaner "Tera Cleaner 1.3" width:260 height:335
 			(
 				layerManager.deleteLayerHierarchy layerEmpty[i]
 			)
+		)
+		
+		count
+	)
+
+	fn countProSound remove:off =
+	(
+		local count = prosound.NumTracks()
+		
+		if remove then
+		(
+			for i in 1 to count do prosound.delete i
 		)
 		
 		count
@@ -175,9 +195,26 @@ rollout teraCleaner "Tera Cleaner 1.3" width:260 height:335
 		btn_ret.tooltip = if state then "Found:\n" + retCount as string + " retimer(s)" else ""
 		btn_ret.enabled = state
 		
-		local layersCount = emptyLayers()
+		local layersCount = countEmptyLayers()
 		_lbl_layers.text = layersCount as string
-		btn_layers.enabled = layersCount != 0
+		btn_layers.enabled = 
+		(
+			if layersCount < 2 then
+			(
+				if layersCount == 1 then
+				(
+					local theLayer = layerManager.getLayer 1
+					if theLayer != undefined then on
+					else off
+				)
+				else off	
+			)
+			else on
+		)
+		
+		local soundCount = countProSound()
+		_lbl_sound.text = soundCount as string
+		btn_sound.enabled = soundCount != 0
 		
 		_lbl_warn.text = note
 	)
@@ -290,7 +327,13 @@ rollout teraCleaner "Tera Cleaner 1.3" width:260 height:335
 	
 	fn remLayers =
 	(
-		emptyLayers remove:on
+		countEmptyLayers remove:on
+		initUI()
+	)
+	
+	fn remSound =
+	(
+		countProSound remove:on
 		initUI()
 	)
 	
@@ -307,9 +350,10 @@ rollout teraCleaner "Tera Cleaner 1.3" width:260 height:335
 	on btn_bip pressed do undo "Remove TrackView Biped" on remBip()
 	on btn_ray pressed do undo "Remove TrackView Raytrace Engine Globals" on remRay()
 	on btn_Mo pressed do undo "Remove TrackView Max MotionClip Manager" on remMo()
-	on btn_Ret pressed do undo off remRet()
+	on btn_Ret pressed do undo off remRet() -- undo could potentially cause crash
 	on btn_layers pressed do undo "Remove Empty Layers" on remLayers()
-	on chk_sublayers changed state do setCheckboxIcon chk_sublayers state
+	on btn_sound pressed do undo off remSound() -- undo does not seem to work
+	
 )
 createDialog teraCleaner
 
